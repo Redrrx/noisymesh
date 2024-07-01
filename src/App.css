@@ -1,0 +1,31 @@
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(to bottom, #FFA500, #4B0082);
+}
+
+.container {
+  display: flex;
+  height: 100%;
+}
+
+.canvas-container {
+  flex: 3;
+  height: 100%;
+}
+
+.text-container {
+  flex: 1;
+  padding: 20px;
+  color: white;
+  font-family: Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
