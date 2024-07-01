@@ -1,5 +1,5 @@
-import React, { useRef, useMemo } from 'react';
-import {Canvas, useFrame} from '@react-three/fiber';
+import React, { useRef, useMemo, useState, useCallback } from 'react';
+import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
 import { createNoise3D } from 'simplex-noise';
@@ -22,9 +22,8 @@ const generateSphericalNoise = (radius, segments, noiseScale) => {
     return geometry;
 };
 
-const NoisySphere = () => {
+const NoisySphere = ({ rotationSpeed, wireframe, geometry }) => {
     const meshRef = useRef();
-    const geometry = useMemo(() => generateSphericalNoise(1, 128, 0.5), []);
 
     const gradientTexture = useMemo(() => {
         const canvas = document.createElement('canvas');
@@ -43,7 +42,7 @@ const NoisySphere = () => {
 
     useFrame((state) => {
         const time = state.clock.getElapsedTime();
-        meshRef.current.rotation.y = time * 0.1;
+        meshRef.current.rotation.y = time * rotationSpeed;
     });
 
     return (
@@ -53,33 +52,56 @@ const NoisySphere = () => {
                 emissive={new THREE.Color(0x330033)}
                 emissiveIntensity={1}
                 shininess={50}
+                wireframe={wireframe}
             />
         </mesh>
     );
 };
 
 const App = () => {
+    const [rotationSpeed, setRotationSpeed] = useState(0.1);
+    const [wireframe, setWireframe] = useState(false);
+    const [geometry, setGeometry] = useState(() => generateSphericalNoise(1, 64, 0.5));
+
+    const regenerateMesh = useCallback(() => {
+        setGeometry(generateSphericalNoise(1, 128, 0.5));
+    }, []);
+
     return (
         <div className="container">
             <div className="canvas-container">
                 <Canvas camera={{ position: [0, 0, 2], fov: 90 }}>
                     <ambientLight intensity={1} />
                     <pointLight position={[10, 10, 10]} />
-                    <NoisySphere />
+                    <NoisySphere rotationSpeed={rotationSpeed} wireframe={wireframe} geometry={geometry} />
                     <OrbitControls />
                 </Canvas>
             </div>
             <div className="text-container">
-                <h1>This is procedurally generated </h1>
-                <p>
-                    Refresh for some random strange looking fruit.
-                </p>
-
+                <h1>This is procedurally generated</h1>
+                <label>
+                    Rotation Speed:
+                    <input
+                        type="number"
+                        value={rotationSpeed}
+                        onChange={(e) => setRotationSpeed(parseFloat(e.target.value))}
+                        step="0.01"
+                    />
+                </label>
+                <br />
+                <label>
+                    <input
+                        type="checkbox"
+                        checked={wireframe}
+                        onChange={() => setWireframe(!wireframe)}
+                    />
+                    Wireframe, that is a lot of vertices?
+                </label>
+                <br />
+                <button onClick={regenerateMesh}>Regenerate Mesh</button>
             </div>
         </div>
-
-
-);
+    );
 };
 
 export default App;
